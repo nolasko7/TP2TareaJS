@@ -1,0 +1,383 @@
+const prompt = require('prompt-sync')({sigint : true});
+
+function crearTarea(tareas){
+    let ok;
+    let titulo;
+    do {
+        ok = false;
+        try {
+        titulo = prompt('1. Ingrese el título de la tarea: ');
+        if (!titulo || titulo.trim() === '') {
+            throw new Error('El título no puede estar vacío o contener espacios en blanco.');
+        }
+        } catch (e) {
+            console.error(e);
+            console.log('Intente nuevamente.');
+            prompt("Presione ENTER para continuar...");
+            console.clear();
+            ok = true;
+        }
+    } while (ok);
+
+    const descripcion = prompt('2. Ingrese la descripción de la tarea: ');
+    let vencimiento;
+    let respuesta = prompt("3. Desea agregar fecha de vencimiento (S/N)? "); // En caso de ENTER (NULL) se responde con fecha de venc null
+    if (!respuesta || respuesta.toLowerCase().at(0) == 'n') {
+        vencimiento = null;
+    } else {
+        console.log("3. Vencimiento de la tarea:");
+        let year = prompt('Ingrese el anio cuando vence la tarea: ');
+        let month = prompt('Ingrese el mes cuando vence la tarea: ');
+        let day = prompt('Ingrese el dia que vence la tarea: ');
+        vencimiento = new Date(year, month-1, day);
+    }
+
+    console.log("4. Ingrese la dificultad de la tarea.");
+    let dif = prompt("[1] ★☆☆ / [2] ★★☆ / [3] ★★★ / ENTER si es default ([1])");
+    if (!dif) {
+        dif = 1;
+    } else {
+        dif = parseInt(dif);
+        while(dif < 1 || dif > 3) {
+            ok = false;
+            try {
+                console.log("Ingrese la dificultad de la tarea. \n");
+                dif = prompt("[1] ★☆☆  [2] ★★☆  [3] ★★★");
+                dif = parseInt(dif);
+                if (dif < 1 || dif > 3) {
+                throw new Error('La dificultad debe estar entre los valores mencionados.');
+                }
+            } catch (e) {
+                console.error(e);
+                console.log('Intente nuevamente.');
+                prompt("Presione ENTER para continuar...");
+                console.clear();
+                ok = true;
+            }
+        }
+    }
+
+    const tarea = {
+        titulo: titulo,
+        descripcion: descripcion,
+        estado: 'Pendiente',
+        creacion: new Date(),
+        ultimaModificacion: new Date(),
+        vencimiento: vencimiento,
+        dificultad: dif,
+    };
+    
+    if (tareas !== null) {
+        tareas.push(tarea); 
+        console.log('Tarea creada exitosamente.');
+    } else {
+        console.log('Hubo un error al crear la tarea.');
+    }
+
+}
+
+function mostrarTarea(tarea) { // muestra una tarea
+            console.log(`Título: ${tarea.titulo}`);
+            console.log(`Descripción: ${tarea.descripcion}`);
+            console.log(`Estado: ${tarea.estado}`);
+            console.log(`Creación: ${tarea.creacion}`);
+
+            if (tarea.ultimaModificacion == tarea.creacion) {
+                console.log('La tarea no ha sido modificada desde su creacion.');
+            } else {
+                console.log(`Última Modificación: ${tarea.ultimaModificacion}`);
+            }   
+
+            console.log(`Vencimiento: ${tarea.vencimiento}`);
+            
+            switch(tarea.dificultad){
+                case 1:
+                    console.log('Dificultad: ★☆☆');
+                    break;
+                case 2:
+                    console.log('Dificultad: ★★☆');
+                    break;
+                case 3:
+                    console.log('Dificultad: ★★★');
+                    break;
+            }
+            console.log('---------------------------');
+}
+
+function mostrarTareas(tareas) { // muestra todas las tareas en la lista[] tareas
+    if (tareas.length === 0) {
+        console.log('No hay tareas para mostrar.');
+    } else {
+        console.clear();
+        for (let i=0; i<tareas.length; i++) {
+            mostrarTarea(tareas[i]);
+        }
+    }
+}
+
+function buscarTarea(tareas, titulo) { // busca una tarea por titulo y devuelve una lista de tareas encontradas
+    if (tareas.length !== 0) {
+        let tareasEncontradas = [];
+        for (let i=0; i<tareas.length; i++) {
+            if (tareas[i].titulo.toLowerCase() === titulo.toLowerCase()) {
+                tareasEncontradas.push(tareas[i]); // mete a la lista todas las tareas que tengan el mismo titulo.
+            }
+        }
+        return tareasEncontradas;
+    } else {
+        console.log("No hay tareas cargadas en el sistema.");
+        return [];
+    }
+}
+
+function eliminarTarea(tareas, titulo) { // devuelve una lista de tareas sin los elementos con determinado titulo
+    if (tareas.length !== 0) {
+        let tareaNueva = [];
+        for (let i=0; i<tareas.length; i++) {
+            if (tareas[i].titulo != titulo) {
+                tareaNueva.push(tareas[i]);
+            }
+        }
+
+        if (tareaNueva.length == tareas.length) {
+            console.log("No se encontro ninguna tarea para eliminar");
+        } else {
+            let elim = Math.abs(tareaNueva.length - tareas.length)
+            console.log(`Se elimino ${elim} tarea/s.`);
+        }
+
+        return tareaNueva;
+    } else {
+        console.log('No hay tareas cargadas en el sistema.');
+        return [];
+    }
+}
+
+function tareasPend(tareas){ // devuelve una lista de tareas con estado pendiente.
+    return tareas.filter(t => t.estado == 'Pendiente');
+}
+
+function tareasEnCurso(tareas){ // devuelve una lista de tareas con estado En curso.
+    return tareas.filter(t => t.estado == 'En Curso');
+}
+
+function tareasTerminadas(tareas){ // Devuelve una lista de tareas con estado terminado.
+    return tareas.filter(t => t.estado == 'Terminada');
+}
+
+function verMisTareas(tareas) { // muestra las tareas que tengan determinado estado.
+    console.log("Que tareas desea ver?");
+    console.log("1. Todas");
+    console.log("2. Pendientes");
+    console.log("3. En curso");
+    console.log("4. Terminadas");
+    console.log("0. Volver");
+    const opcion = prompt('Seleccione una opción (0-4): ');
+    switch (opcion) {
+        case '0' :
+            break;
+        case '1':
+            console.clear();
+            mostrarTareas(tareas);
+            break;
+        case '2':
+            console.clear();
+            mostrarTareas(tareasPend(tareas));
+            break;
+        case '3':
+            console.clear();
+            mostrarTareas(tareasEnCurso(tareas));
+            break;
+        case '4':
+            console.clear();
+            mostrarTareas(tareasTerminadas(tareas));
+            break;
+        default:
+            console.clear();
+            console.log('Opción no válida');
+            break;
+    }
+}
+
+function modificarTarea(tareas, titulo) { // modifica una sola tarea y la retorna.
+    if (tareas.length == 0) {
+        console.log('No hay tareas cargadas en el sistema.');
+        return [];
+    }
+    let respuesta;
+    let tareaEditar;
+    let tareasEncontradas = buscarTarea(tareas,titulo);
+    if (tareasEncontradas.length == 0) {
+        console.log("No se encontraron tareas con ese titulo.");
+    } else {
+        if (tareasEncontradas.length > 1) { // existe mas de una tarea con el mismo titulo
+        let n = tareasEncontradas.length;
+        console.log(n);
+        do {
+            mostrarTareas(tareasEncontradas);
+            try {
+                respuesta = prompt(`Cual de las siguientes tareas desea modificar? (1 al ${n})`);
+                if (respuesta > n || respuesta < 1) {
+                    throw Error(`El numero debe estar entre 1 y ${n}.`);
+                }
+            } catch(e) {
+                console.log(e);
+                console.log("Porfavor, intente nuevamente.");
+                prompt("Presione ENTER para continuar...");
+                console.clear();
+            }
+        } while (respuesta > n || respuesta < 1);
+
+        tareaEditar = tareasEncontradas[respuesta-1];
+        console.log('Estas editando la tarea ' + tareaEditar.titulo + ` numero ${respuesta}`);
+        } else {
+            tareaEditar = tareasEncontradas[0];
+            console.log('Estas editando la tarea ' + tareaEditar.titulo);
+        }
+    } 
+    console.log('- Si deseas mantener los valores de un atributo, simplemente dejelo en blanco.');
+    console.log('- Si deseas dejar en blanco un atributo, escribe un espacio.');
+
+    let descripcion = prompt('1. Ingresa la descripcion: ');
+    if (descripcion !== null) {
+        tareaEditar.descripcion = descripcion;
+    }
+    let ok;
+    do {
+        let est = prompt('2. Estado ([P]endiente / [E]n curso / [T]erminada / [C]ancelada): ');
+        ok = false;
+        try {
+            switch(est) {
+                case 'P' :
+                    tareaEditar.estado = "Pendiente"
+                    break;
+                case 'E' :
+                    tareaEditar.estado = "En curso"
+                    break;
+                case 'T' :
+                    tareaEditar.estado = "Terminada"
+                    break;
+                case 'C' :
+                    tareaEditar.estado = "Cancelada"
+                    break;
+                default :
+                    ok = true;
+                    throw Error ('El estado ingresado es invalido, por lo tanto no se pudo asignar el valor correctamente.');
+            }
+            } catch(e) {
+                console.log(e);
+                console.log('Intente ingresando el estado nuevamente.')
+                prompt("Presione ENTER para continuar...");
+                console.clear();
+            }
+        } while (ok);
+    let dif = prompt('3. Dificultad ([1] / [2] / [3]): ');
+    
+    if (dif !== null) {
+        dif = parseInt(dif);
+        tareaEditar.dificultad = dif;
+    }
+    let vencimiento;
+    let resp = prompt("4. Desea modificar fecha de vencimiento (S/N)? ");
+    if (!resp || resp.toLowerCase().at(0) == 'n') {
+        vencimiento = null;
+    } else if (resp.toLowerCase().at(0) == 's') {
+        console.log("Vencimiento de la tarea:");
+        let year = prompt('Ingrese el anio cuando vence la tarea: ');
+        let month = prompt('Ingrese el mes cuando vence la tarea: ');
+        let day = prompt('Ingrese el dia que vence la tarea: ');
+        tareaEditar.vencimiento = new Date(year, month-1, day);
+    }
+
+    tareaEditar.ultimaModificacion = new Date();
+    let found = false;
+    let i = 0;
+    while (!found && i < tareas.length) {
+        if (tareaEditar.creacion.valueOf() === tareas[i].creacion.valueOf()) {
+            tareas[i] = tareaEditar;
+            found = true;
+        }
+        i++;
+    }
+    console.log('Datos guardados!');
+}
+
+function menu(tareas) {
+    let titulo;
+    console.clear();
+    console.log('Menú de opciones:');
+    console.log('1. Crear tarea');
+    console.log('2. Mostrar tareas');
+    console.log('3. Buscar tarea/s');
+    console.log('4. Modificar tarea');
+    console.log('5. Eliminar tarea');
+    console.log('0. Salir');
+    const opcion = prompt('Seleccione una opción (0-5): ');
+    switch (opcion) {
+        case '0':
+            console.clear();
+            console.log('Saliendo del programa...');
+            return false;
+        case '1':
+            console.clear();
+            crearTarea(tareas);
+            break;
+        case '2':
+            console.clear();
+            verMisTareas(tareas);
+            break;
+        case '3':
+            console.clear();
+            if (tareas.length !== 0) {
+                titulo = prompt('Ingrese un titulo de la tarea a buscar: ');
+                if (!titulo || titulo.trim() == '') {
+                    console.log("Debe ingresar un titulo para buscar una tarea.");
+                } else {
+                    if (buscarTarea(tareas, titulo).length == 0) {
+                        console.log('No se encontraron tareas con ese titulo.');
+                    } else {
+                        mostrarTareas(buscarTarea(tareas,titulo));
+                    }
+                }
+            } else {
+                console.log('No hay tareas cargadas en el sistema.');
+            }
+            break;
+            case '4':
+            console.clear();
+            if (tareas.length !== 0) {
+                titulo = prompt('Ingrese un titulo de la tarea a modificar: ');
+                if (!titulo || titulo.trim() == '') {
+                    console.log("Debe ingresar un titulo para buscar una tarea.");
+                } else {
+                    modificarTarea(tareas, titulo);
+                }
+            }
+            break;
+        case '5':
+            console.clear();
+            titulo = prompt('Ingrese un titulo para eliminar la tarea: ');
+            if (!titulo || titulo.trim() == '') {
+                console.log("Debe ingresar un titulo para eliminar una tarea.");
+            } else {
+                tareas = eliminarTarea(tareas,titulo);
+            }
+            break;
+        default:
+            console.clear();
+            console.log('Opción no válida, intente nuevamente.');
+            break;
+    }
+    prompt("Presione ENTER para continuar...");
+    return true;
+}
+
+function main(){
+    let tareas = [];
+    let salir = true;
+    while (salir) {
+        salir = menu(tareas);
+    }
+}
+
+main();
