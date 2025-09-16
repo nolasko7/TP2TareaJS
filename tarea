@@ -330,7 +330,7 @@ function modificarTarea(tareas, titulo) { // modifica una sola tarea y la retorn
 function menu(tareas) {
     let titulo;
     console.clear();
-    console.log('Menú de opciones:');
+    console.log('Menú de tareas:');
     console.log('1. Crear tarea');
     console.log('2. Mostrar tareas');
     console.log('3. Buscar tarea/s');
