@@ -10,6 +10,9 @@ function crearTarea(tareas){
         if (!titulo || titulo.trim() === '') {
             throw new Error('El título no puede estar vacío o contener espacios en blanco.');
         }
+        if (titulo.length > 200) {
+            throw new Error('El titulo no debe contener mas de 200 caracteres. ');
+        }
         } catch (e) {
             console.error(e);
             console.log('Intente nuevamente.');
@@ -21,15 +24,28 @@ function crearTarea(tareas){
 
     const descripcion = prompt('2. Ingrese la descripción de la tarea: ');
     let vencimiento;
+    let actualDate = new Date();
     let respuesta = prompt("3. Desea agregar fecha de vencimiento (S/N)? "); // En caso de ENTER (NULL) se responde con fecha de venc null
     if (!respuesta || respuesta.toLowerCase().at(0) == 'n') {
         vencimiento = null;
     } else {
-        console.log("3. Vencimiento de la tarea:");
-        let year = prompt('Ingrese el anio cuando vence la tarea: ');
-        let month = prompt('Ingrese el mes cuando vence la tarea: ');
-        let day = prompt('Ingrese el dia que vence la tarea: ');
-        vencimiento = new Date(year, month-1, day);
+        do {
+            try {
+                ok = false;
+                console.log("3. Vencimiento de la tarea:");
+                let year = prompt('Ingrese el anio cuando vence la tarea: ');
+                let month = prompt('Ingrese el mes cuando vence la tarea: ');
+                let day = prompt('Ingrese el dia que vence la tarea: ');
+                vencimiento = new Date(year, month-1, day);
+                if (vencimiento < actualDate){
+                    throw Error('No debe ingresar una fecha menor a la fecha actual.');
+                }
+            } catch (e) {
+                console.error(e);
+                console.log('Intente nuevamente.');
+                ok = true;
+            }
+        } while (ok);
     }
 
     console.log("4. Ingrese la dificultad de la tarea.");
