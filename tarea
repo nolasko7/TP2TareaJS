@@ -96,15 +96,24 @@ function mostrarTarea(tarea) { // muestra una tarea
             console.log(`Título: ${tarea.titulo}`);
             console.log(`Descripción: ${tarea.descripcion}`);
             console.log(`Estado: ${tarea.estado}`);
-            console.log(`Creación: ${tarea.creacion}`);
+            console.log(`Creación: ${tarea.creacion.toLocaleDateString("es-AR")}`);
 
             if (tarea.ultimaModificacion == tarea.creacion) {
                 console.log('La tarea no ha sido modificada desde su creacion.');
             } else {
-                console.log(`Última Modificación: ${tarea.ultimaModificacion}`);
+                if (tarea.ultimaModificacion) {
+                    console.log(`Última Modificación: ${tarea.ultimaModificacion.toLocaleDateString("es-AR")}`);
+                } else {
+                    console.log('No hay fecha de modificacion.');
+                }
+                
             }   
 
-            console.log(`Vencimiento: ${tarea.vencimiento}`);
+            if (tarea.vencimiento) {
+                console.log(`Vencimiento: ${tarea.vencimiento.toLocaleDateString("es-AR")}`);
+            } else {
+                console.log('No hay fecha de vencimiento.');
+            }
             
             switch(tarea.dificultad){
                 case 1:
