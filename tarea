@@ -81,6 +81,7 @@ function crearTarea(tareas){
         ultimaModificacion: new Date(),
         vencimiento: vencimiento,
         dificultad: dif,
+        noborrado: true,
     };
     
     if (tareas !== null) {
@@ -93,7 +94,8 @@ function crearTarea(tareas){
 }
 
 function mostrarTarea(tarea) { // muestra una tarea
-            console.log(`Título: ${tarea.titulo}`);
+            if (tarea.noborrado) {
+                console.log(`Título: ${tarea.titulo}`);
             console.log(`Descripción: ${tarea.descripcion}`);
             console.log(`Estado: ${tarea.estado}`);
             console.log(`Creación: ${tarea.creacion.toLocaleDateString("es-AR")}`);
@@ -127,6 +129,7 @@ function mostrarTarea(tarea) { // muestra una tarea
                     break;
             }
             console.log('---------------------------');
+            }
 }
 
 function mostrarTareas(tareas) { // muestra todas las tareas en la lista[] tareas
@@ -157,24 +160,16 @@ function buscarTarea(tareas, titulo) { // busca una tarea por titulo y devuelve 
 
 function eliminarTarea(tareas, titulo) { // devuelve una lista de tareas sin los elementos con determinado titulo
     if (tareas.length !== 0) {
-        let tareaNueva = [];
+        let cont = 0;
         for (let i=0; i<tareas.length; i++) {
-            if (tareas[i].titulo != titulo) {
-                tareaNueva.push(tareas[i]);
+            if (tareas[i].titulo.toLowerCase() === titulo.toLowerCase()) {
+                tareas[i].noborrado = false;
+                cont++;
             }
         }
-
-        if (tareaNueva.length == tareas.length) {
-            console.log("No se encontro ninguna tarea para eliminar");
-        } else {
-            let elim = Math.abs(tareaNueva.length - tareas.length)
-            console.log(`Se elimino ${elim} tarea/s.`);
-        }
-
-        return tareaNueva;
+        console.log(`Se eliminaron ${cont} tarea/s.`);
     } else {
         console.log('No hay tareas cargadas en el sistema.');
-        return [];
     }
 }
 
@@ -385,7 +380,7 @@ function menu(tareas) {
             if (!titulo || titulo.trim() == '') {
                 console.log("Debe ingresar un titulo para eliminar una tarea.");
             } else {
-                tareas = eliminarTarea(tareas,titulo);
+                eliminarTarea(tareas,titulo);
             }
             break;
         default:
